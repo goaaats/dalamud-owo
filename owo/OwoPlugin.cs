@@ -18,19 +18,15 @@ namespace owofy
             pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
         }
 
-        private void Chat_OnChatMessage(Dalamud.Game.Chat.XivChatType type, uint senderId, ref Dalamud.Game.Internal.Libc.StdString sender, ref Dalamud.Game.Internal.Libc.StdString message, ref bool isHandled)
+        private void Chat_OnChatMessage(Dalamud.Game.Chat.XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
         {
-            var parsed = SeString.Parse(message.RawData);
-
-            foreach (var payload in parsed.Payloads)
+            foreach (var payload in message.Payloads)
             {
                 if (payload is TextPayload textPayload)
                 {
                     textPayload.Text = Owofy(textPayload.Text);
                 }
             }
-
-            message.RawData = parsed.Encode();
         }
 
         private readonly string[] faces = { "(・`ω´・)", ";;w;;", "owo", "UwU", ">w<", "^w^" };
