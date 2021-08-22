@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.IoC;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using owofy.Attributes;
 
@@ -11,20 +15,23 @@ namespace owofy
     public class OwoPlugin : IDalamudPlugin
     {
         private DalamudPluginInterface _pi;
+        private ChatGui _chatGui;
+
         private PluginCommandManager<OwoPlugin> commandManager;
         private Configuration config;
         private readonly Random _rng = new Random();
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public OwoPlugin([RequiredVersion("1.0")] DalamudPluginInterface pluginInterface, [RequiredVersion("1.0")] ChatGui chat, [RequiredVersion("1.0")] CommandManager commands)
         {
             _pi = pluginInterface;
+            _chatGui = chat;
 
             this.config = (Configuration)_pi.GetPluginConfig() ?? new Configuration();
             this.config.Initialize(_pi);
 
-            pluginInterface.Framework.Gui.Chat.OnChatMessage += Chat_OnChatMessage;
+            _chatGui.ChatMessage += Chat_OnChatMessage;
 
-            this.commandManager = new PluginCommandManager<OwoPlugin>(this, _pi);
+            this.commandManager = new PluginCommandManager<OwoPlugin>(this, commands);
         }
 
         private void Chat_OnChatMessage(Dalamud.Game.Text.XivChatType type, uint senderId, ref SeString sender, ref SeString message, ref bool isHandled)
@@ -39,7 +46,7 @@ namespace owofy
                     }
                 }
             }
-            
+
         }
 
         private readonly string[] faces = { "(・`ω´・)", ";;w;;", "owo", "UwU", ">w<", "^w^" };
@@ -66,8 +73,7 @@ namespace owofy
             config.Save();
             // You may want to assign these references to private variables for convenience.
             // Keep in mind that the local player does not exist until after logging in.
-            var chat = this._pi.Framework.Gui.Chat;
-            chat.Print($"Hello Owofied chat.");
+            _chatGui.Print($"Hello Owofied chat.");
             PluginLog.Verbose("OwO has been enabled.");
         }
 
@@ -79,8 +85,7 @@ namespace owofy
             config.Save();
             // You may want to assign these references to private variables for convenience.
             // Keep in mind that the local player does not exist until after logging in.
-            var chat = this._pi.Framework.Gui.Chat;
-            chat.Print($"Goodbye Owofied chat. ;_;");
+            _chatGui.Print($"Goodbye Owofied chat. ;_;");
             PluginLog.Verbose("OwO has been disabled.");
         }
 
@@ -88,7 +93,7 @@ namespace owofy
 
         public void Dispose()
         {
-            _pi.Framework.Gui.Chat.OnChatMessage -= Chat_OnChatMessage;
+            _chatGui.ChatMessage -= Chat_OnChatMessage;
             _pi.Dispose();
         }
     }

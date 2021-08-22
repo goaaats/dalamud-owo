@@ -12,13 +12,13 @@ namespace owofy
 {
     public class PluginCommandManager<THost> : IDisposable
     {
-        private readonly DalamudPluginInterface pluginInterface;
+        private readonly CommandManager cmdManager;
         private readonly (string, CommandInfo)[] pluginCommands;
         private readonly THost host;
 
-        public PluginCommandManager(THost host, DalamudPluginInterface pluginInterface)
+        public PluginCommandManager(THost host, CommandManager cmdManager)
         {
-            this.pluginInterface = pluginInterface;
+            this.cmdManager = cmdManager;
             this.host = host;
 
             this.pluginCommands = host.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance)
@@ -38,7 +38,7 @@ namespace owofy
             for (var i = 0; i < this.pluginCommands.Length; i++)
             {
                 var (command, commandInfo) = this.pluginCommands[i];
-                this.pluginInterface.CommandManager.AddHandler(command, commandInfo);
+                this.cmdManager.AddHandler(command, commandInfo);
             }
         }
 
@@ -47,7 +47,7 @@ namespace owofy
             for (var i = 0; i < this.pluginCommands.Length; i++)
             {
                 var (command, _) = this.pluginCommands[i];
-                this.pluginInterface.CommandManager.RemoveHandler(command);
+                this.cmdManager.RemoveHandler(command);
             }
         }
 
